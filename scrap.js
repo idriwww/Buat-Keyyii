@@ -1,11 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
-    feather.replace(); 
+    feather.replace();
 
     const playPauseButton = document.getElementById('play-pause');
     const audio = document.getElementById('audio');
     const songDuration = document.getElementById('song-duration');
     const lyricsContainer = document.getElementById('lyrics-container');
     let intervalId;
+    let lyricsInterval;
 
     const lyrics = [
         { time: 0.5, text: "jadi kekasihku saja" },
@@ -28,30 +29,30 @@ document.addEventListener('DOMContentLoaded', () => {
     function togglePlay() {
         if (audio.paused) {
             audio.play();
-            playPauseButton.innerHTML = '<i data-feather="pause"></i>'; 
-            feather.replace(); 
-            displayDuration(); 
-            startPageTransition(); 
-            syncLyrics(); 
+            playPauseButton.innerHTML = '<i data-feather="pause"></i>';
+            feather.replace();
+            displayDuration();
+            startPageTransition();
+            syncLyrics();
         } else {
             audio.pause();
             playPauseButton.innerHTML = '<i data-feather="play"></i>';
-            feather.replace(); 
-            clearInterval(intervalId); 
-            clearInterval(lyricsInterval); 
+            feather.replace();
+            clearInterval(intervalId);
+            clearInterval(lyricsInterval);
         }
     }
 
     function displayDuration() {
         audio.addEventListener('loadedmetadata', () => {
             const duration = formatTime(audio.duration);
-            songDuration.textContent = duration; 
+            songDuration.textContent = duration;
         });
 
         audio.addEventListener('timeupdate', () => {
             const currentTime = formatTime(audio.currentTime);
             const duration = formatTime(audio.duration);
-            songDuration.textContent = currentTime + ' / ' + duration; 
+            songDuration.textContent = currentTime + ' / ' + duration;
         });
     }
 
@@ -113,7 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentPage < rightPages.length - 1) {
             currentPage++;
         } else {
-            currentPage = 0; 
+            clearInterval(intervalId);  // Hentikan perputaran otomatis saat sampai di halaman terakhir
+            playPauseButton.innerHTML = '<i data-feather="play"></i>';
+            feather.replace();
+            currentPage = 0;  // Reset ke halaman pertama, tetapi tidak langsung berputar
         }
         showPage(currentPage);
     }
@@ -123,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function syncLyrics() {
-        const lyricsInterval = setInterval(() => {
+        lyricsInterval = setInterval(() => {
             const currentTime = audio.currentTime;
             const currentLyric = lyrics.find(lyric => Math.floor(lyric.time) === Math.floor(currentTime));
             if (currentLyric) {
